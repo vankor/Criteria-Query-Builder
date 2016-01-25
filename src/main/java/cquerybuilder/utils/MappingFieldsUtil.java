@@ -1,5 +1,6 @@
-package cquerybuilder;
+package cquerybuilder.utils;
 
+import cquerybuilder.annotations.ResultProp;
 import cquerybuilder.exceptions.PassingFieldsException;
 
 import java.lang.reflect.Field;

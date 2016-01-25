@@ -3,6 +3,15 @@ package cquerybuilder;
 
 import cquerybuilder.exceptions.NotSupportedException;
 import cquerybuilder.exceptions.PassingConstructorException;
+import cquerybuilder.extractors.ConstructorPassingExtractor;
+import cquerybuilder.extractors.FieldsPassingExtractor;
+import cquerybuilder.extractors.PassingExtractor;
+import cquerybuilder.groupers.GrouperFactory;
+import cquerybuilder.groupers.QueryGrouper;
+import cquerybuilder.matchers.MatcherFactory;
+import cquerybuilder.matchers.Matchers;
+import cquerybuilder.matchers.PredicateMatcher;
+import cquerybuilder.utils.JpaUtils;
 import javafx.util.Pair;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;

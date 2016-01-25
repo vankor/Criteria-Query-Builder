@@ -1,8 +1,4 @@
-package cquerybuilder;
-
-import cquerybuilder.matchers.BetweenMatcher;
-import cquerybuilder.matchers.ContainsMatcher;
-import cquerybuilder.matchers.EqualsMatcher;
+package cquerybuilder.matchers;
 
 /**
  * Created by vankor on 1/19/16.

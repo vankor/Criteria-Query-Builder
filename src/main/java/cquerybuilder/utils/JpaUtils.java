@@ -1,4 +1,4 @@
-package cquerybuilder;
+package cquerybuilder.utils;
 
 import org.springframework.beans.PropertyAccessor;
 import org.springframework.beans.PropertyAccessorFactory;

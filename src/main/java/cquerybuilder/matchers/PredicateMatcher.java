@@ -1,4 +1,4 @@
-package cquerybuilder;
+package cquerybuilder.matchers;
 
 import cquerybuilder.exceptions.NotSupportedException;
 

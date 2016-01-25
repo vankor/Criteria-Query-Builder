@@ -1,5 +1,6 @@
-package cquerybuilder;
+package cquerybuilder.extractors;
 
+import cquerybuilder.utils.MappingFieldsUtil;
 import cquerybuilder.exceptions.NotSupportedException;
 
 import javax.persistence.criteria.CriteriaBuilder;

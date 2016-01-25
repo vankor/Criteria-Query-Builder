@@ -1,4 +1,4 @@
-package cquerybuilder;
+package cquerybuilder.groupers;
 
 /**
  * Created by vankor on 1/19/16.

@@ -1,5 +1,6 @@
-package cquerybuilder;
+package cquerybuilder.extractors;
 
+import cquerybuilder.annotations.QueryResult;
 import cquerybuilder.exceptions.NotSupportedException;
 import cquerybuilder.exceptions.PassingConstructorException;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;

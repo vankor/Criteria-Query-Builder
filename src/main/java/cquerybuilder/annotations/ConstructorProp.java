@@ -1,4 +1,4 @@
-package cquerybuilder;
+package cquerybuilder.annotations;
 
 import java.lang.annotation.*;
 

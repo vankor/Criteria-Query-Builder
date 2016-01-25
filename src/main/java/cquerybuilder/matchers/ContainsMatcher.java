@@ -1,7 +1,6 @@
 package cquerybuilder.matchers;
 
-import cquerybuilder.ExpressionPathExtractor;
-import cquerybuilder.PredicateMatcher;
+import cquerybuilder.extractors.ExpressionPathExtractor;
 import cquerybuilder.exceptions.NotSupportedException;
 
 import javax.persistence.criteria.*;

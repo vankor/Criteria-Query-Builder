@@ -1,4 +1,6 @@
-package cquerybuilder;
+package cquerybuilder.groupers;
+
+import cquerybuilder.extractors.ExpressionPathExtractor;
 
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
