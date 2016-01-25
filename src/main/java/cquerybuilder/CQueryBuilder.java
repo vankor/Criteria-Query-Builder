@@ -17,7 +17,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-
 import javax.persistence.EntityManager;
 import javax.persistence.Id;
 import javax.persistence.TypedQuery;
@@ -163,19 +162,13 @@ public class CQueryBuilder<S, D> {
         return this;
     }
 
-    public CQueryBuilder<S, D> passing(String... fields) throws PassingConstructorException, NoSuchFieldException {
+    public CQueryBuilder<S, D> passing(String... fields) throws PassingConstructorException, NoSuchFieldException, NotSupportedException {
         Selection[] selections = new Selection[fields.length];
-        try {
-            applyJoins(root);
-            PassingExtractor<D> extractor = new ConstructorPassingExtractor<>(targetClass);
-            extractor.extractNames(fields);
-            selections = extractor.extractSelections(root, cb);
-            mappings = extractor.getMappings();
-
-        } catch (NotSupportedException e) {
-            e.printStackTrace();
-        }
-
+        applyJoins(root);
+        PassingExtractor<D> extractor = new ConstructorPassingExtractor<>(targetClass);
+        extractor.extractNames(fields);
+        selections = extractor.extractSelections(root, cb);
+        mappings = extractor.getMappings();
         cq.select(cb.construct(this.targetClass, selections));
         return this;
     }
