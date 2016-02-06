@@ -18,6 +18,45 @@ Features, that we can use:
 In usage example query we have to join 4 tables, filter rows, group results, pass result into no-entity object, aplly paging. 
 That provides banner click statistic.
 
+QueryBuilder final query:
+
+```
+EntityManager em = (.. getting EntityManager )
+Pageable pageable = (.. getting Spring Data pageable object)
+
+
+Page<BannerStatistic> bannerStats = CQueryBuilder.<BannerImpression, BannerStatistic>from(BannerImpression.class, em)
+                    .leftJoin("clickout")
+                    .innerJoin("banner")
+                    .innerJoin("banner.placement")
+                    .into(BannerStatistic.class)
+                    .where("viewTime", Matchers.BETWEEN, //fromDate//, //toDate//)
+                    .and("banner.partnerId", Matchers.EQUALS, //partnerId//)
+                    .groupBy("banner.id", "banner.placement.name")
+                    .listPageable(pageable);
+```  
+
+Finally CQueryBuilder will generate such analytical SQL query:
+
+``` 
+ SELECT alias3.id,
+        alias3.partner_id,
+        alias3.src,
+        alias3.href,
+        alias4.name,
+        COUNT(alias1.hash),
+        COUNT(alias2.id),
+        AVG(alias1.bid_millicent),
+        SUM(alias1.bid_millicent)
+ FROM banner_imp alias1 LEFT JOIN banner_click alias2 ON alias1.hash = alias2.imp_hash
+                        INNER JOIN banner alias3 ON alias1.banner_id = alias3.id
+                        INNER JOIN banner_place alias4 ON alias3.id = alias4.id
+      WHERE  (view_time BETWEEN //dateFrom// AND //dateTo//) 
+             AND alias3.partner_id = //partnerId//
+      GROUP BY alias3.id, alias4.name
+      ORDER BY {orderColumn}  // order from Pageable object
+      LIMIT {limit} // limit from Pageable object
+``` 
   
 Entity classes: 
 ```  
@@ -157,42 +196,4 @@ class BannerStatistic {
   }       
 ```  
 
-QueryBuilder final query:
 
-```
-EntityManager em = (.. getting EntityManager )
-Pageable pageable = (.. getting Spring Data pageable object)
-
-
-Page<BannerStatistic> bannerStats = CQueryBuilder.<BannerImpression, BannerStatistic>from(BannerImpression.class, em)
-                    .leftJoin("clickout")
-                    .innerJoin("banner")
-                    .innerJoin("banner.placement")
-                    .into(BannerStatistic.class)
-                    .where("viewTime", Matchers.BETWEEN, //fromDate//, //toDate//)
-                    .and("banner.partnerId", Matchers.EQUALS, //partnerId//)
-                    .groupBy("banner.id", "banner.placement.name")
-                    .listPageable(pageable);
-```  
-
-Finally CQueryBuilder will generate such analytical SQL query:
-
-``` 
- SELECT alias3.id,
-        alias3.partner_id,
-        alias3.src,
-        alias3.href,
-        alias4.name,
-        COUNT(alias1.hash),
-        COUNT(alias2.id),
-        AVG(alias1.bid_millicent),
-        SUM(alias1.bid_millicent)
- FROM banner_imp alias1 LEFT JOIN banner_click alias2 ON alias1.hash = alias2.imp_hash
-                        INNER JOIN banner alias3 ON alias1.banner_id = alias3.id
-                        INNER JOIN banner_place alias4 ON alias3.id = alias4.id
-      WHERE  (view_time BETWEEN //dateFrom// AND //dateTo//) 
-             AND alias3.partner_id = //partnerId//
-      GROUP BY alias3.id, alias4.name
-      ORDER BY {orderColumn}  // order from Pageable object
-      LIMIT {limit} // limit from Pageable object
-``` 
