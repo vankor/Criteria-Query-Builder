@@ -10,12 +10,12 @@ Features, that we can use:
  - and/or 
  - groub by
  - aggreagating functions (sum, min, max, count, avg)
- - Spring Data Pageable object for paging and sorting
+ - spring data Pageable object for paging and sorting
  
  Lib allows to pass result set of constructed query, that used entity class into another no entity class, for example Dto. 
  We can map query result to other entity with help of passing method and constructor params or field annotations for no-entity class (@ResultProp). 
 
-In usage example we have to join 3 tables, filter rows, group results and pass result into no-entity objects. 
+In usage example we have to join 3 tables, filter rows, group results, pass result into no-entity object, aplly pagging. 
 
 ```
 EntityManager em = (.. getting EntityManager )
