@@ -32,7 +32,7 @@ Page<BannerStatistic> bannerStats = CQueryBuilder.<BannerImpression, BannerStati
    
 Result Dto:
 
-public class BannerStatistic {
+class BannerStatistic {
 
     @ResultProp(value = "banner.id", order = 1) // @ResultProp defines query result field mappings
     private Integer bannerId;
@@ -70,7 +70,7 @@ Entity class:
   
 @Entity
 @Table(name = "table_name")
-public class BannerImpression implements Impression {
+class BannerImpression implements Impression {
 
     @Id
     @Column(name = "bi_hash")
