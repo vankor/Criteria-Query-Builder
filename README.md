@@ -15,7 +15,7 @@ Features, that we can use:
  Lib allows to pass result set of constructed query, that used entity class into another no entity class, for example Dto. 
  We can map query result to other entity with help of passing method and constructor params or field annotations for no-entity class (@ResultProp). 
 
-In usage example query we have to join 4 tables, filter rows, group results, pass result into no-entity object, aplly pagging. 
+In usage example query we have to join 4 tables, filter rows, group results, pass result into no-entity object, aplly paging. 
 That provides banner click statistic.
 
   
