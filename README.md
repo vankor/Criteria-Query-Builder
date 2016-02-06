@@ -18,7 +18,7 @@ Features, that we can use:
 In usage example query we have to join 4 tables, filter rows, group results, pass result into no-entity object, aplly paging. 
 That provides banner click statistic.
 
-QueryBuilder final query:
+CQueryBuilder final query:
 
 ```
 EntityManager em = (.. getting EntityManager )
