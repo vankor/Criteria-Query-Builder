@@ -17,8 +17,10 @@ Features, that we can use:
 
 In usage example we have to join 3 tables, filter rows, group results and pass result into no-entity objects. 
 
+```
 EntityManager em = (.. getting EntityManager )
 Pageable pageable = (.. getting Spring Data pageable object)
+
 
 Page<BannerStatistic> bannerStats = CQueryBuilder.<BannerImpression, BannerStatistic>from(BannerImpression.class, em)
                     .leftJoin("clickout")
@@ -29,9 +31,11 @@ Page<BannerStatistic> bannerStats = CQueryBuilder.<BannerImpression, BannerStati
                     .and("banner.partnerId", Matchers.EQUALS, login.getBrandId())
                     .groupBy("banner.id", "banner.placement.name")
                     .listPageable(pageable);
+```                    
    
 Result Dto:
 
+```
 class BannerStatistic {
 
     @ResultProp(value = "banner.id", order = 1) // @ResultProp defines query result field mappings
@@ -64,10 +68,10 @@ class BannerStatistic {
     ....
     
   }       
-  
+```  
   
 Entity class: 
-  
+```  
 @Entity
 @Table(name = "table_name")
 class BannerImpression implements Impression {
@@ -98,3 +102,4 @@ class BannerImpression implements Impression {
     
     ....
  }                     
+```
