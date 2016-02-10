@@ -146,6 +146,7 @@ public class CQueryBuilder<S, D> {
 
     public CQueryBuilder<S, D> where(PredicateMatcher matcher) throws NotSupportedException {
         commonPredicate = matcher.predicate(root, cb, mappings);
+        cq = cq.where(commonPredicate);
         return this;
     }
 
@@ -176,6 +177,7 @@ public class CQueryBuilder<S, D> {
     public static <S, D> CQueryBuilder<S, D> from(Class<S> entityClass, EntityManager em) {
         CQueryBuilder<S, D> builder = new CQueryBuilder<>(em);
         builder.entityClass = entityClass;
+        builder.targetClass = (Class<D>)entityClass;
         builder.cq = (CriteriaQuery<D>) builder.cb.createQuery(entityClass);
         builder.root = builder.cq.from(entityClass);
         return builder;
@@ -210,7 +212,13 @@ public class CQueryBuilder<S, D> {
         JpaUtils.copyCriteriaWithoutSelectionAndOrder(cq, query, true);
         long count = count();
         sort(pageable);
-        TypedQuery<D> limitedQuery = em.createQuery(cq);
+        TypedQuery<D> limitedQuery = null;
+        if(entityClass.getCanonicalName().equals(targetClass.getCanonicalName())){
+            limitedQuery = em.createQuery(query);
+        }
+        else {
+            limitedQuery = em.createQuery(cq);
+        }
         limitedQuery.setFirstResult(pageable.getOffset());
         limitedQuery.setMaxResults(pageable.getPageSize());
         List<D> results = limitedQuery.getResultList();
