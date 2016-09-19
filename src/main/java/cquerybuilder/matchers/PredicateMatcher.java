@@ -1,8 +1,11 @@
-package cquerybuilder.matchers;
+package com.projecta.bobby.commons.cquerybuilder.matchers;
 
-import cquerybuilder.exceptions.NotSupportedException;
+import com.projecta.bobby.commons.cquerybuilder.exceptions.NotSupportedException;
 
-import javax.persistence.criteria.*;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import java.util.Map;
 
 /**

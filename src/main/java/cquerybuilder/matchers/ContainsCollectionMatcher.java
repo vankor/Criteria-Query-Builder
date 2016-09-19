@@ -12,11 +12,11 @@ import java.util.Map;
 /**
  * Created by vankor on 1/16/16.
  */
-public class ContainsMatcher<T extends Comparable<? super T>> extends ExpressionPathExtractor<T> implements PredicateMatcher<T> {
+public class ContainsCollectionMatcher<T extends Comparable<? super T>> extends ExpressionPathExtractor<T> implements PredicateMatcher<T> {
 
     private T fieldValue;
 
-    public ContainsMatcher(String fieldName, T fieldValue) {
+    public ContainsCollectionMatcher(String fieldName, T fieldValue) {
         this.fieldName = fieldName;
         this.fieldValue = fieldValue;
     }
@@ -36,10 +36,7 @@ public class ContainsMatcher<T extends Comparable<? super T>> extends Expression
         if (objectPath == null) {
             objectPath = getExpressionPath(root, cb);
         }
-        predicate = cb.like(objectPath, "%" + ((fieldValue == null) ? "" : fieldValue) + "%");
-
-        return predicate;
-
+        return cb.isMember(fieldValue, objectPath);
     }
 
 

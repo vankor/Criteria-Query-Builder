@@ -1,11 +1,11 @@
-package cquerybuilder.groupers;
+package com.projecta.bobby.commons.cquerybuilder.groupers;
 
 /**
  * Created by vankor on 1/19/16.
  */
 public class GrouperFactory {
 
-    public static  QueryGrouper createGrouper(String ... groupingFields) throws IllegalArgumentException{
+    public static QueryGrouper createGrouper(String... groupingFields) throws IllegalArgumentException {
         return new QueryGrouper(groupingFields);
     }
 

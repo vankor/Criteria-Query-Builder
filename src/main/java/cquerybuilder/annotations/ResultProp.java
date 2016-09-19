@@ -1,4 +1,4 @@
-package cquerybuilder.annotations;
+package com.projecta.bobby.commons.cquerybuilder.annotations;
 
 import java.lang.annotation.*;
 
@@ -10,5 +10,6 @@ import java.lang.annotation.*;
 @Documented
 public @interface ResultProp {
     String value();
+
     int order();
 }

@@ -7,26 +7,27 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import java.util.List;
 import java.util.Map;
 
 /**
  * Created by vankor on 1/16/16.
  */
-public class ContainsMatcher<T extends Comparable<? super T>> extends ExpressionPathExtractor<T> implements PredicateMatcher<T> {
+public class InMatcher<T extends Comparable<? super T>> extends ExpressionPathExtractor<T> implements PredicateMatcher<T> {
 
-    private T fieldValue;
+    private List<T> fieldValues;
 
-    public ContainsMatcher(String fieldName, T fieldValue) {
+    public InMatcher(String fieldName, List<T> fieldValues) {
         this.fieldName = fieldName;
-        this.fieldValue = fieldValue;
+        this.fieldValues = fieldValues;
     }
 
     public Object getFieldValue() {
-        return fieldValue;
+        return fieldValues;
     }
 
-    public void setFieldValue(T fieldValue) {
-        this.fieldValue = fieldValue;
+    public void setFieldValue(List<T> fieldValues) {
+        this.fieldValues = fieldValues;
     }
 
     @Override
@@ -36,10 +37,7 @@ public class ContainsMatcher<T extends Comparable<? super T>> extends Expression
         if (objectPath == null) {
             objectPath = getExpressionPath(root, cb);
         }
-        predicate = cb.like(objectPath, "%" + ((fieldValue == null) ? "" : fieldValue) + "%");
-
-        return predicate;
-
+        return objectPath.in(fieldValues);
     }
 
 

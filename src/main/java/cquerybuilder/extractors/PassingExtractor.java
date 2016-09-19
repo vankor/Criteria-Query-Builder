@@ -1,6 +1,6 @@
-package cquerybuilder.extractors;
+package com.projecta.bobby.commons.cquerybuilder.extractors;
 
-import cquerybuilder.exceptions.NotSupportedException;
+import com.projecta.bobby.commons.cquerybuilder.exceptions.NotSupportedException;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Expression;
@@ -14,6 +14,10 @@ import java.util.Map;
 public interface PassingExtractor<T> {
 
     String[] extractNames(String... fields) throws NoSuchFieldException;
+
     Selection[] extractSelections(Root<?> root, CriteriaBuilder cb) throws NotSupportedException, NoSuchFieldException;
+
     Map<String, Expression> getMappings();
+
+    void extractFilterProps(Root<?> root, CriteriaBuilder cb) throws NotSupportedException, NoSuchFieldException;
 }

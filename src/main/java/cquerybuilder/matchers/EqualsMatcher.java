@@ -1,16 +1,18 @@
-package cquerybuilder.matchers;
+package com.projecta.bobby.commons.cquerybuilder.matchers;
 
+import com.projecta.bobby.commons.cquerybuilder.exceptions.NotSupportedException;
+import com.projecta.bobby.commons.cquerybuilder.extractors.ExpressionPathExtractor;
 
-import cquerybuilder.extractors.ExpressionPathExtractor;
-import cquerybuilder.exceptions.NotSupportedException;
-
-import javax.persistence.criteria.*;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import java.util.Map;
 
 /**
  * Created by vankor on 1/16/16.
  */
-public class EqualsMatcher<T extends Comparable <? super T>> extends ExpressionPathExtractor<T> implements PredicateMatcher<T> {
+public class EqualsMatcher<T extends Comparable<? super T>> extends ExpressionPathExtractor<T> implements PredicateMatcher<T> {
 
     private T fieldValue;
 
@@ -34,16 +36,15 @@ public class EqualsMatcher<T extends Comparable <? super T>> extends ExpressionP
     public Predicate predicate(Root<T> root, CriteriaBuilder cb, Map<String, Expression> mappings) throws NotSupportedException {
         Predicate predicate = null;
         Expression objectPath = mappings.get(this.fieldName);
-        if(objectPath == null){
+        if (objectPath == null) {
             objectPath = getExpressionPath(root, cb);
         }
-        if(fieldName != null) {
+        if (fieldName != null) {
             predicate = cb.equal(objectPath, ((fieldValue == null) ? "" : fieldValue));
         }
         return predicate;
 
     }
-
 
 
 }

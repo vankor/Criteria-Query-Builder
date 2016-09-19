@@ -1,13 +1,13 @@
-package cquerybuilder.utils;
+package com.projecta.bobby.commons.cquerybuilder.utils;
 
-import cquerybuilder.annotations.ResultProp;
-import cquerybuilder.exceptions.PassingFieldsException;
+import com.projecta.bobby.commons.cquerybuilder.annotations.FilterProps;
+import com.projecta.bobby.commons.cquerybuilder.annotations.ResultProp;
+import com.projecta.bobby.commons.cquerybuilder.exceptions.PassingFieldsException;
 
+import javax.persistence.criteria.Expression;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by vankor on 1/20/16.
@@ -47,6 +47,22 @@ public class MappingFieldsUtil<T> {
         }
         Field[] result = new Field[listResult.size()];
         return listResult.toArray(result);
+
+    }
+
+    public static Map<String, String> getFilterMappingFields(Class clazz) throws NoSuchFieldException {
+        Map<String, String> res = new HashMap<>();
+        FilterProps filterMappings = null;
+         if(clazz.isAnnotationPresent(FilterProps.class)){
+             filterMappings = (FilterProps)clazz.getAnnotation(FilterProps.class);
+         }
+        if(filterMappings != null){
+            String[] arr = filterMappings.value();
+            for(int i = 0; i < arr.length-1; i++){
+                res.put(arr[i], arr[i+1]);
+            }
+        }
+        return res;
 
     }
 }

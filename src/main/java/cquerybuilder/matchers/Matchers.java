@@ -1,4 +1,4 @@
-package cquerybuilder.matchers;
+package com.projecta.bobby.commons.cquerybuilder.matchers;
 
 /**
  * Created by vankor on 1/19/16.
@@ -6,5 +6,7 @@ package cquerybuilder.matchers;
 public enum Matchers {
     EQUALS,
     CONTAINS,
-    BETWEEN
+    BETWEEN,
+    IN,
+    COLLECTION_CONTAINS
 }

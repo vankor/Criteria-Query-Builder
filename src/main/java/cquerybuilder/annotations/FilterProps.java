@@ -5,8 +5,9 @@ import java.lang.annotation.*;
 /**
  * Created by vankor on 1/20/16.
  */
-@Target({ElementType.CONSTRUCTOR})
+@Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface QueryResult {
+public @interface FilterProps {
+    String[] value();
 }

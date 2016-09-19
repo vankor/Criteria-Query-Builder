@@ -1,4 +1,4 @@
-package cquerybuilder.exceptions;
+package com.projecta.bobby.commons.cquerybuilder.exceptions;
 
 /**
  * Created by vankor on 1/20/16.

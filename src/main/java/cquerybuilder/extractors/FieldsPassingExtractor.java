@@ -1,7 +1,8 @@
-package cquerybuilder.extractors;
+package com.projecta.bobby.commons.cquerybuilder.extractors;
 
-import cquerybuilder.utils.MappingFieldsUtil;
-import cquerybuilder.exceptions.NotSupportedException;
+import com.google.common.collect.Lists;
+import com.projecta.bobby.commons.cquerybuilder.exceptions.NotSupportedException;
+import com.projecta.bobby.commons.cquerybuilder.utils.MappingFieldsUtil;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Expression;
@@ -32,7 +33,7 @@ public class FieldsPassingExtractor<T> implements PassingExtractor<T> {
     public String[] extractNames(String... fields) throws NoSuchFieldException {
         Field[] targetFiels = targetClass.getDeclaredFields();
         targetFiels = MappingFieldsUtil.getResultMappingFields(targetFiels);
-        List<String> resultFieldNames = new ArrayList<>();
+        List<String> resultFieldNames = Lists.newArrayList();
         for (Field fName : targetFiels) {
             fName.setAccessible(true);
             resultFieldNames.add(fName.getName());
@@ -53,13 +54,22 @@ public class FieldsPassingExtractor<T> implements PassingExtractor<T> {
         for (Field field : targetFiels) {
             field.setAccessible(true);
             String path = MappingFieldsUtil.getStringPathByFieldName(field.getName(), targetClass);
-            Expression expression = ExpressionPathExtractor.aggregateFunc(root, path, cb);
+            Expression expression = ExpressionPathExtractor.calculateExpression(root, path, cb);
             mappings.put(field.getName(), expression);
             listSelection.add(expression);
         }
 
         Selection[] arraySelection = new Selection[listSelection.size()];
         return listSelection.toArray(arraySelection);
+    }
+
+    @Override
+    public void extractFilterProps(Root<?> root, CriteriaBuilder cb) throws NotSupportedException, NoSuchFieldException {
+        Map<String, String> filterMappings = MappingFieldsUtil.getFilterMappingFields(targetClass);
+        for (Map.Entry<String, String> entry : filterMappings.entrySet()) {
+            Expression expression = ExpressionPathExtractor.calculateExpression(root, entry.getValue(), cb);
+            mappings.put(entry.getKey(), expression);
+        }
     }
 
     @Override

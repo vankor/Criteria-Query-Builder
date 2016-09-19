@@ -1,4 +1,4 @@
-package cquerybuilder.utils;
+package com.projecta.bobby.commons.cquerybuilder.utils;
 
 import org.springframework.beans.PropertyAccessor;
 import org.springframework.beans.PropertyAccessorFactory;
@@ -28,7 +28,7 @@ public abstract class JpaUtils {
     private static Pattern ALIAS_PATTERN = Pattern.compile(ALIAS_PATTERN_STRING, Pattern.CASE_INSENSITIVE);
     private static String FROM_PATTERN_STRING = "(from.*+)";
     private static Pattern FROM_PATTERN = Pattern.compile(FROM_PATTERN_STRING, Pattern.CASE_INSENSITIVE);
-    private static volatile int aliasCount = 0;
+    public static volatile int aliasCount = 0;
 
     /**
      * Result count from a CriteriaQuery
@@ -68,14 +68,13 @@ public abstract class JpaUtils {
      * @return root alias or generated one
      */
     public static synchronized <T> String getOrCreateAlias(Selection<T> selection) {
-// reset alias count
-        if (aliasCount > 1000)
-            aliasCount = 0;
+        // reset alias count
         String alias = selection.getAlias();
         if (alias == null) {
             alias = "vankor_generatedAlias" + aliasCount++;
             selection.alias(alias);
         }
+
         return alias;
     }
 

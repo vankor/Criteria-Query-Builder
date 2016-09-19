@@ -1,27 +1,28 @@
-package cquerybuilder;
+package com.projecta.bobby.commons.cquerybuilder;
 
-
-import cquerybuilder.exceptions.NotSupportedException;
-import cquerybuilder.exceptions.PassingConstructorException;
-import cquerybuilder.extractors.ConstructorPassingExtractor;
-import cquerybuilder.extractors.FieldsPassingExtractor;
-import cquerybuilder.extractors.PassingExtractor;
-import cquerybuilder.groupers.GrouperFactory;
-import cquerybuilder.groupers.QueryGrouper;
-import cquerybuilder.matchers.MatcherFactory;
-import cquerybuilder.matchers.Matchers;
-import cquerybuilder.matchers.PredicateMatcher;
-import cquerybuilder.utils.JpaUtils;
-import javafx.util.Pair;
+import com.google.common.collect.Lists;
+import com.projecta.bobby.commons.cquerybuilder.exceptions.FieldNotFoundException;
+import com.projecta.bobby.commons.cquerybuilder.exceptions.NotSupportedException;
+import com.projecta.bobby.commons.cquerybuilder.extractors.ConstructorPassingExtractor;
+import com.projecta.bobby.commons.cquerybuilder.extractors.FieldsPassingExtractor;
+import com.projecta.bobby.commons.cquerybuilder.extractors.PassingExtractor;
+import com.projecta.bobby.commons.cquerybuilder.groupers.GrouperFactory;
+import com.projecta.bobby.commons.cquerybuilder.groupers.QueryGrouper;
+import com.projecta.bobby.commons.cquerybuilder.matchers.MatcherFactory;
+import com.projecta.bobby.commons.cquerybuilder.matchers.Matchers;
+import com.projecta.bobby.commons.cquerybuilder.matchers.PredicateMatcher;
+import com.projecta.bobby.commons.cquerybuilder.utils.JpaUtils;
+import com.projecta.framework.backend.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+
 import javax.persistence.EntityManager;
-import javax.persistence.Id;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.*;
-import java.lang.reflect.Field;
 import java.util.*;
 
 public class CQueryBuilder<S, D> {
@@ -34,8 +35,9 @@ public class CQueryBuilder<S, D> {
     protected Class<D> targetClass;
     protected EntityManager em;
     protected QueryGrouper<S> grouper;
-    protected Map<String, List<Pair<String, JoinType>>> joinsQueues = new HashMap<>();
+    protected Map<String, Set<Pair<String, JoinType>>> joinsQueues = new HashMap<>();
     protected Map<String, Expression> mappings = new HashMap<>();
+    private static final Logger LOG = LoggerFactory.getLogger(CQueryBuilder.class);
 
     public CQueryBuilder(EntityManager em) {
         this.em = em;
@@ -113,10 +115,10 @@ public class CQueryBuilder<S, D> {
         String base = parts[0];
         Integer i = 0;
         for (String part : parts) {
-            List<Pair<String, JoinType>> queue = joinsQueues.get(base);
+            Set<Pair<String, JoinType>> queue = joinsQueues.get(base);
             if (i == 0) {
                 if (queue == null) {
-                    queue = new LinkedList<>();
+                    queue = new LinkedHashSet<>();
                 } else {
                     i++;
                     continue;
@@ -150,25 +152,35 @@ public class CQueryBuilder<S, D> {
         return this;
     }
 
-    public CQueryBuilder<S, D> into(Class<D> tagretClass) throws NoSuchFieldException, NotSupportedException {
+    public CQueryBuilder<S, D> into(Class<D> tagretClass) {
         this.targetClass = tagretClass;
         cq = cb.createQuery(tagretClass);
         root = cq.from(entityClass);
         applyJoins(root);
         PassingExtractor<D> extractor = new FieldsPassingExtractor<>(targetClass);
-        Selection[] selections = extractor.extractSelections(root, cb);
+        Selection[] selections = new Selection[0];
+        try {
+            selections = extractor.extractSelections(root, cb);
+            extractor.extractFilterProps(root, cb);
+        } catch (NoSuchFieldException e) {
+            throw new FieldNotFoundException(e);
+        }
         mappings = extractor.getMappings();
         cq.select(cb.construct(this.targetClass, selections));
 
         return this;
     }
 
-    public CQueryBuilder<S, D> passing(String... fields) throws PassingConstructorException, NoSuchFieldException, NotSupportedException {
+    public CQueryBuilder<S, D> passing(String... fields) {
         Selection[] selections = new Selection[fields.length];
         applyJoins(root);
         PassingExtractor<D> extractor = new ConstructorPassingExtractor<>(targetClass);
-        extractor.extractNames(fields);
-        selections = extractor.extractSelections(root, cb);
+        try {
+            extractor.extractNames(fields);
+            selections = extractor.extractSelections(root, cb);
+        } catch (NoSuchFieldException e) {
+            throw new FieldNotFoundException(e);
+        }
         mappings = extractor.getMappings();
         cq.select(cb.construct(this.targetClass, selections));
         return this;
@@ -177,7 +189,7 @@ public class CQueryBuilder<S, D> {
     public static <S, D> CQueryBuilder<S, D> from(Class<S> entityClass, EntityManager em) {
         CQueryBuilder<S, D> builder = new CQueryBuilder<>(em);
         builder.entityClass = entityClass;
-        builder.targetClass = (Class<D>)entityClass;
+        builder.targetClass = (Class<D>) entityClass;
         builder.cq = (CriteriaQuery<D>) builder.cb.createQuery(entityClass);
         builder.root = builder.cq.from(entityClass);
         return builder;
@@ -213,17 +225,29 @@ public class CQueryBuilder<S, D> {
         long count = count();
         sort(pageable);
         TypedQuery<D> limitedQuery = null;
-        if(entityClass.getCanonicalName().equals(targetClass.getCanonicalName())){
+        filterNotAnnotatedFieldsFromOrdering();
+        if (targetClass == null || entityClass.getCanonicalName().equals(targetClass.getCanonicalName())) {
             limitedQuery = em.createQuery(query);
-        }
-        else {
+        } else {
             limitedQuery = em.createQuery(cq);
         }
         limitedQuery.setFirstResult(pageable.getOffset());
         limitedQuery.setMaxResults(pageable.getPageSize());
         List<D> results = limitedQuery.getResultList();
         Page<D> page = new PageImpl<>(results, pageable, count);
+
+        JpaUtils.aliasCount = 0;
         return page;
+    }
+
+    private void filterNotAnnotatedFieldsFromOrdering() {
+        Iterator<Order> iter = cq.getOrderList().iterator();
+        while (iter.hasNext()) {
+            Order order = iter.next();
+            if (order.getExpression() == null) {
+                iter.remove();
+            }
+        }
     }
 
     public void sort(Pageable pageable) {
@@ -243,21 +267,8 @@ public class CQueryBuilder<S, D> {
         }
     }
 
-    public String getRootIdFieldName() {
-        String idFieldName = null;
-        for (Field field : entityClass.getDeclaredFields()) {
-            field.setAccessible(true);
-            if (field.getAnnotation(Id.class) != null) {
-                idFieldName = field.getName();
-            }
-
-        }
-
-        return idFieldName;
-    }
-
     public Long count() throws NotSupportedException {
-        List<Long> counts = new ArrayList<>();
+        List<Long> counts = Lists.newArrayList();
         Long result = 0L;
         counts = JpaUtils.count(em, cq);
         if (grouper != null) {
@@ -265,27 +276,35 @@ public class CQueryBuilder<S, D> {
         } else {
             result = (counts.isEmpty()) ? 0L : counts.get(0);
         }
-
+        JpaUtils.aliasCount = 0;
         return result;
     }
 
 
     public List<D> list() {
-        return em.createQuery(cq).getResultList();
+        try {
+            return em.createQuery(cq).getResultList();
+        } finally {
+            JpaUtils.aliasCount = 0;
+        }
+    }
+
+    public D single() {
+        return em.createQuery(cq).getSingleResult();
     }
 
     private void applyJoins(Root<S> root) {
         Join lastJoin = null;
-        for (Map.Entry<String, List<Pair<String, JoinType>>> entry : joinsQueues.entrySet()) {
+        for (Map.Entry<String, Set<Pair<String, JoinType>>> entry : joinsQueues.entrySet()) {
             Integer i = 0;
             for (Pair<String, JoinType> currentJoinParams : entry.getValue()) {
                 if (i == 0) {
-                    lastJoin = root.join(currentJoinParams.getKey(), currentJoinParams.getValue());
+                    lastJoin = root.join(currentJoinParams.getFirst(), currentJoinParams.getSecond());
                     lastJoin.alias(JpaUtils.getOrCreateAlias(lastJoin));
                     i++;
                     continue;
                 }
-                lastJoin = lastJoin.join(currentJoinParams.getKey(), currentJoinParams.getValue());
+                lastJoin = lastJoin.join(currentJoinParams.getFirst(), currentJoinParams.getSecond());
                 lastJoin.alias(JpaUtils.getOrCreateAlias(lastJoin));
                 i++;
             }
